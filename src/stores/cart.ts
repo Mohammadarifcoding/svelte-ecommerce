@@ -1,36 +1,46 @@
-import type { Product } from '$lib/data/Product';
+// src/lib/stores/cart.ts
 import { writable } from 'svelte/store';
+import type { Product } from '$lib/data/Product';
 
 interface TCart extends Product {
 	quantity: number;
 }
 
-const storedCart = localStorage.getItem('cart');
-const initialCart = storedCart ? JSON.parse(storedCart) : [];
+const isBrowser = typeof window !== 'undefined';
 
-export const cart = writable<TCart[]>(initialCart);
+const getInitialCart = (): TCart[] => {
+	if (!isBrowser) return [];
+	try {
+		const stored = localStorage.getItem('cart');
+		return stored ? JSON.parse(stored) : [];
+	} catch {
+		return [];
+	}
+};
 
-cart.subscribe((value) => {
-	localStorage.setItem('cart', JSON.stringify(value));
-});
+const cart = writable<TCart[]>(getInitialCart());
 
-const addtoCart = (product: TCart) => {
+// ✅ Safe subscription for localStorage (browser-only)
+if (isBrowser) {
+	cart.subscribe((value) => {
+		localStorage.setItem('cart', JSON.stringify(value));
+	});
+}
+
+const addToCart = (product: Product) => {
 	cart.update((cartItems) => {
-		if (cartItems.find((item) => item.id === product.id)) {
-			return cartItems.map((item) => {
-				if (item.id === product.id) {
-					item.quantity += 1;
-				}
-				return item;
-			});
-		} else {
-			return [...cartItems, { ...product }];
+		const existingItem = cartItems.find((item) => item.id === product.id);
+		if (existingItem) {
+			return cartItems.map((item) =>
+				item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+			);
 		}
+		return [...cartItems, { ...product, quantity: 1 }];
 	});
 };
 
-const removeFromCart = (product: TCart) => {
-	cart.update((cartItems) => cartItems.filter((item) => item.id !== product.id));
+const removeFromCart = (id: number) => {
+	cart.update((items) => items.filter((item) => item.id !== id));
 };
 
 const clearCart = () => {
@@ -38,22 +48,18 @@ const clearCart = () => {
 };
 
 const updateQuantity = (id: number, quantity: number) => {
-	cart.update((cartItems) => {
-		return cartItems.map((item) => {
-			if (item.id === id) {
-				item.quantity = quantity;
-			}
-			return item;
-		});
-	});
+	cart.update((items) => items.map((item) => (item.id === id ? { ...item, quantity } : item)));
 };
 
 const getTotal = () => {
 	let total = 0;
-	cart.subscribe((cartItems) => {
-		total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-	});
+	if (isBrowser) {
+		const items = get(cart);
+		total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+	}
 	return total;
 };
 
-export { addtoCart, removeFromCart, clearCart, updateQuantity, getTotal };
+import { get } from 'svelte/store'; // required for get(cart)
+
+export { cart, addToCart, removeFromCart, clearCart, updateQuantity, getTotal };

@@ -1,5 +1,5 @@
 <script>
-	import { ProductData } from '$lib/data/Product';
+	import { products } from '../../../stores/product';
 	import ProductCard from '../../shared/Card/ProductCard.svelte';
 	import Filter from '../../shared/Filter.svelte';
 </script>
@@ -7,7 +7,7 @@
 <div class="lg:col-span-2">
 	<Filter />
 	<div class="product-grid">
-		{#each ProductData as product (product.id)}
+		{#each $products as product (product.id)}
 			<ProductCard {product} />
 		{/each}
 	</div>

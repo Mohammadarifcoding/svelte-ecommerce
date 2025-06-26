@@ -1,8 +1,28 @@
 <script lang="ts">
+	import type { Product } from '$lib/data/Product';
+	import { addToCart, cart, removeFromCart } from '../../../stores/cart';
+	import { updateProduct } from '../../../stores/product';
 	import Rating from '../Rating.svelte';
 
 	let { product } = $props();
 	console.log(product.image);
+	console.log($cart);
+
+	function handleAddToCart(product: Product) {
+		// Add the product to the cart
+		addToCart(product);
+		// Optionally, update the isInCart flag on the product
+		// This allows your UI to reflect that the item is now in the cart
+		updateProduct(product.id);
+	}
+
+	function handleRemoveCart(id: number) {
+		removeFromCart(id);
+		updateProduct(id);
+	}
+	let isInCart = $derived(!!$cart.find((item) => item.id == product.id));
+
+	console.log($cart);
 </script>
 
 <div
@@ -23,9 +43,18 @@
 			<span class="text-xs text-gray-700">(212 pcs left)</span>
 		</div>
 		<p class="font-bold">${product.price}</p>
-		<button
-			class="mt-2 flex w-full items-center justify-center rounded bg-red-800 py-1 text-gray-100"
-			>Remove from Cart</button
-		>
+		{#if isInCart}
+			<button
+				onclick={() => handleRemoveCart(product.id)}
+				class="mt-2 flex w-full items-center justify-center rounded bg-indigo-800 py-1 text-gray-100"
+				>Remove from Cart</button
+			>
+		{:else}
+			<button
+				onclick={() => handleAddToCart(product)}
+				class="mt-2 flex w-full items-center justify-center rounded bg-red-800 py-1 text-gray-100"
+				>Add To Cart</button
+			>
+		{/if}
 	</div>
 </div>
