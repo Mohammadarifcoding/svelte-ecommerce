@@ -1,6 +1,4 @@
-
-
-interface Product {
+export interface Product {
 	id: number;
 	image: string; // or import type: image: StaticImageData (for Next.js w/ image imports)
 	name: string;
