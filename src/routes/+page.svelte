@@ -1,3 +1,14 @@
-<h1>Welcome to your library project</h1>
-<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	import Product from '../components/page/product/Product.svelte';
+	import Filter from '../components/shared/Filter.svelte';
+	import Main from '../components/shared/Main.svelte';
+	import Navbar from '../components/shared/Navbar.svelte';
+	import Topbar from '../components/shared/Topbar.svelte';
+</script>
+
+<Topbar />
+<Navbar />
+<Main>
+	<Product />
+	<Filter />
+</Main>

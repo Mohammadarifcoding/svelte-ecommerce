@@ -1,0 +1,31 @@
+<script lang="ts">
+	import Rating from '../Rating.svelte';
+
+	let { product } = $props();
+	console.log(product.image);
+</script>
+
+<div
+	class="overflow-hidden rounded-lg bg-gray-100 transition-transform duration-300 hover:scale-[1.02]"
+>
+	<div class="flex h-48 items-center justify-center bg-gray-200">
+		<img src={product.image} alt="Gradient Graphic T-shirt" class="h-full w-auto object-cover" />
+	</div>
+	<div class="p-4">
+		<h3 class="font-medium">{product.name}</h3>
+		<div class="flex items-center justify-between">
+			<div class="my-1 flex items-center">
+				<div class="flex text-yellow-400">
+					<Rating rating={product.rating} />
+				</div>
+				<span class="ml-1 text-xs text-gray-500">{product.rating}/5</span>
+			</div>
+			<span class="text-xs text-gray-700">(212 pcs left)</span>
+		</div>
+		<p class="font-bold">${product.price}</p>
+		<button
+			class="mt-2 flex w-full items-center justify-center rounded bg-red-800 py-1 text-gray-100"
+			>Remove from Cart</button
+		>
+	</div>
+</div>
