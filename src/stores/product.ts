@@ -5,7 +5,7 @@ import { addToCart } from './cart';
 
 const products = writable([...ProductData]);
 
-const updateProduct = (id: number) => {
+const addProductIntoCart = (id: number) => {
 	products.update((items) =>
 		items.map((item) => {
 			if (item.id === id) {
@@ -13,7 +13,7 @@ const updateProduct = (id: number) => {
 					// If not in cart, add it
 					addToCart(item); // Call addToCart from the cart store
 				}
-				// If it's already in the cart and updateProduct is called again (e.g., to remove from cart),
+				// If it's already in the cart and addProductIntoCart is called again (e.g., to remove from cart),
 				// you would typically call removeFromCart here. For simplicity, this only adds.
 				return { ...item, isInCart: !item.isInCart };
 			}
@@ -22,4 +22,4 @@ const updateProduct = (id: number) => {
 	);
 };
 
-export { products, updateProduct };
+export { products, addProductIntoCart };
