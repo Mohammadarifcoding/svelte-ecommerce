@@ -17,8 +17,8 @@
 		addProductIntoCart(id);
 	}
 	let isInCart = $derived(!!$cart.find((item) => item.id == product.id));
-
-	console.log($cart);
+	// let isInCartData = isInCart(product.id);
+	// console.log($cart);
 </script>
 
 <div

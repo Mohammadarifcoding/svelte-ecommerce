@@ -1,8 +1,8 @@
 // src/lib/stores/cart.ts
-import { writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import type { Product } from '$lib/data/Product';
 
-interface TCart extends Product {
+export interface TCart extends Product {
 	quantity: number;
 }
 
@@ -22,9 +22,7 @@ const cart = writable<TCart[]>(getInitialCart());
 
 // ✅ Safe subscription for localStorage (browser-only)
 if (isBrowser) {
-	cart.subscribe((value) => {
-		localStorage.setItem('cart', JSON.stringify(value));
-	});
+	cart.subscribe((v) => localStorage.setItem('cart', JSON.stringify(v)));
 }
 
 const addToCart = (product: Product) => {
@@ -47,19 +45,37 @@ const clearCart = () => {
 	cart.set([]);
 };
 
-const updateQuantity = (id: number, quantity: number) => {
-	cart.update((items) => items.map((item) => (item.id === id ? { ...item, quantity } : item)));
+const updateQuantity = (id: number) => {
+	cart.update((items) =>
+		items.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item))
+	);
 };
 
-const getTotal = () => {
-	let total = 0;
-	if (isBrowser) {
-		const items = get(cart);
-		total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-	}
-	return total;
+// ✅ Use derived stores for reactive calculations
+
+export const getItemQuantity = (id: number) => {
+	return derived(cart, ($cart) => {
+		const item = $cart.find((item) => item.id === id);
+		return item ? item.quantity : 0;
+	});
 };
 
-import { get } from 'svelte/store'; // required for get(cart)
+export const isInCart = (id: number) => {
+	return derived(cart, ($cart) => {
+		return $cart.some((item) => item.id === id);
+	});
+};
+export const cartTotal = derived(cart, ($c) => $c.reduce((s, i) => s + i.price * i.quantity, 0));
+console.log('Cart Total:', cartTotal);
+export const cartItemCount = derived(cart, ($c) => $c.reduce((s, i) => s + i.quantity, 0));
+export const itemQuantities = derived(cart, ($c) => new Map($c.map((i) => [i.id, i.quantity])));
 
-export { cart, addToCart, removeFromCart, clearCart, updateQuantity, getTotal };
+
+
+
+export const qty = (id: number, $itemQuantities: Map<number, number>) =>
+	$itemQuantities.get(id) ?? 0;
+
+// ✅ Remove problematic getTotal function - use cartTotal derived store instead
+
+export { cart, addToCart, removeFromCart, clearCart, updateQuantity };
