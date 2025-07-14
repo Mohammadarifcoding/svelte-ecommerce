@@ -13,17 +13,25 @@ export interface TAuth {
 }
 
 const isBrowser = typeof window !== 'undefined';
-
-const Auth = writable<TAuth>({
-	user: localStorage.getItem('auth')
-		? JSON.parse(localStorage.getItem('Auth') as string)
-		: { email: '', password: '' },
-	token: localStorage.getItem('token') ? (localStorage.getItem('token') as string) : '',
-	refreshToken: localStorage.getItem('refreshToken')
-		? (localStorage.getItem('refreshToken') as string)
-		: '',
+let initialAuth: TAuth = {
+	user: { email: '', password: '' },
+	token: '',
+	refreshToken: '',
 	loading: false
-});
+};
+
+if (isBrowser) {
+	initialAuth = {
+		user: localStorage.getItem('auth')
+			? JSON.parse(localStorage.getItem('auth') as string)
+			: { email: '', password: '' },
+		token: localStorage.getItem('token') || '',
+		refreshToken: localStorage.getItem('refreshToken') || '',
+		loading: false
+	};
+}
+
+const Auth = writable<TAuth>(initialAuth);
 
 // ✅ Safe subscription for localStorage (browser-only)
 if (isBrowser) {

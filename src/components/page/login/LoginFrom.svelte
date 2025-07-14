@@ -2,6 +2,9 @@
 	import { preventDefault } from 'svelte/legacy';
 
 	import z from 'zod';
+	import useAxios from '../../../hooks/useAxios';
+	import { setAuth } from '../../../stores/auth';
+	import { goto } from '$app/navigation';
 
 	// 🍃 Form model using Zod for lightweight validation
 	const LoginSchema = z.object({
@@ -9,13 +12,38 @@
 		password: z.string().min(6, { message: 'At least 6 chars' }),
 		remember: z.boolean().optional()
 	});
-
+	const axios = useAxios();
 	// 🗂️ Form state
 	let form = $state({ email: '', password: '', remember: false });
-	let errors: Record<string, string> = {};
+	let errors = $state<Record<string, string>>({});
 	let loading = false;
 
-	const handleSubmit = async () => {};
+	const handleSubmit = async () => {
+		try {
+			const result = LoginSchema.safeParse(form);
+			if (!result.success) {
+				const fieldErrors = result.error.flatten().fieldErrors;
+				errors = Object.fromEntries(
+					Object.entries(fieldErrors).map(([key, val]) => [key, val?.[0] ?? ''])
+				);
+				return;
+			}
+			const data = await axios.post('/auth/login', form);
+			if (data.status == 200) {
+				setAuth({
+					user: data.data.user,
+					token: data.data.accessToken,
+					refreshToken: data.data.refreshToken,
+					loading: true
+				});
+				goto('/');
+			}
+
+			console.log(data);
+		} catch (err) {
+			console.log(err);
+		}
+	};
 </script>
 
 <!-- ⚡ Styled with Tailwind – tweak to taste -->
