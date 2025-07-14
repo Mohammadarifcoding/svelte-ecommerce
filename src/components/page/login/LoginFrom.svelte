@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { preventDefault } from 'svelte/legacy';
+
 	import z from 'zod';
 
 	// 🍃 Form model using Zod for lightweight validation
@@ -9,7 +11,7 @@
 	});
 
 	// 🗂️ Form state
-	let form = { email: '', password: '', remember: false };
+	let form = $state({ email: '', password: '', remember: false });
 	let errors: Record<string, string> = {};
 	let loading = false;
 
@@ -21,7 +23,7 @@
 	class="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 to-white p-6"
 >
 	<form
-		on:submit|preventDefault={handleSubmit}
+		onsubmit={preventDefault(handleSubmit)}
 		class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl ring-1 ring-indigo-100"
 	>
 		<h1 class="mb-6 text-center text-2xl font-bold text-black">Sign In</h1>

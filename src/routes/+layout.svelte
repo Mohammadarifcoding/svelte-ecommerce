@@ -2,7 +2,7 @@
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 
 	import { QueryClient } from '@tanstack/query-core';
-
+	let { children } = $props();
 	import '../app.css';
 	import Navbar from '../components/shared/Navbar.svelte';
 	import Topbar from '../components/shared/Topbar.svelte';
@@ -13,5 +13,5 @@
 <QueryClientProvider client={queryClient}>
 	<Topbar />
 	<Navbar />
-	<slot />
+	{@render children?.()}
 </QueryClientProvider>
